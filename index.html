@@ -1,160 +1,237 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="sr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EuroLeague Interactive Dashboard</title>
+    <title>EuroLeague Analytics - 6.75 Range</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --el-orange: #ff5000;
+            --purple-gradient: linear-gradient(180deg, #30106b 0%, #0000a0 100%);
+            --glass: rgba(255, 255, 255, 0.08);
+            --glass-border: rgba(255, 255, 255, 0.15);
+        }
+
         body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            background-color: #111; 
+            font-family: 'Inter', sans-serif; 
+            background-color: #0a0a0a; 
             color: white; 
-            margin: 0; 
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        .glass-card {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 20px;
+            transition: 0.3s;
+        }
+
+        .glass-card:hover { transform: translateY(-5px); }
+
+        .live-dot {
+            height: 10px;
+            width: 10px;
+            background-color: #ff0000;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+            animation: pulse-red 1.5s infinite;
+        }
+
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 0, 0, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0); }
+        }
+
+        #loginPage { 
+            background: radial-gradient(circle, #222 0%, #000 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .login-box { width: 100%; max-width: 350px; text-align: center; }
+
+        .custom-input {
+            background: white !important;
+            border: none !important;
+            border-radius: 0 !important; /* Prema Figmi */
+            height: 45px;
+            margin-bottom: 10px;
+        }
+
+        .submit-btn {
+            background: #333 !important;
+            color: white !important;
+            border: 1px solid #555;
+            padding: 10px 40px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .submit-btn:hover {
+            background: var(--el-orange) !important;
+            box-shadow: 0 0 15px rgba(255, 80, 0, 0.5);
+        }
+
+        #menuPage {
+            background: var(--purple-gradient);
             min-height: 100vh;
         }
-        
-        #loginPage { 
-            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('euroleague.png');
-            background-size: cover; 
-            background-position: center; 
-            height: 100vh; 
+
+        .nav-header {
             display: flex;
-            align-items: center;
-            justify-content: center;
+            justify-content: space-between;
+            padding: 20px;
+            background: rgba(0,0,0,0.3);
         }
 
-        .custom-card {
-            background: rgba(30, 30, 30, 0.95);
-            border-radius: 15px;
-            border: 1px solid #333;
-            padding: 30px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+        .team-icon {
+            width: 70px;
+            cursor: pointer;
+            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        .page { display: none; padding-top: 50px; padding-bottom: 50px; }
-        
-        .img-fluid-custom {
-            border-radius: 10px;
-            border: 2px solid #444;
-            margin-bottom: 20px;
-            width: 100%;
-            height: auto;
-        }
+        .team-icon:hover { transform: scale(1.3); filter: brightness(1.2); }
 
-        .nav-btn {
-            padding: 15px;
+        .page { display: none; }
+
+        .btn-next {
+            background: #ddd;
+            color: black;
+            border: none;
+            padding: 8px 20px;
             font-weight: bold;
-            transition: transform 0.2s;
+            margin-bottom: 15px;
+            transition: 0.2s;
         }
-        .nav-btn:hover { transform: scale(1.05); }
+
+        .btn-next:hover { background: white; transform: translateX(5px); }
+
+        .back-btn {
+            border: 1px solid white;
+            color: white;
+            padding: 5px 15px;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 20px;
+            transition: 0.3s;
+        }
+        .back-btn:hover { background: white; color: black; }
     </style>
 </head>
 <body>
 
-<div id="loginPage" class="container-fluid">
-    <div class="row w-100 justify-content-center">
-        <div class="col-11 col-sm-8 col-md-6 col-lg-4 col-xl-3">
-            <div class="custom-card text-center">
-                <h3 class="mb-4">EuroLeague Login</h3>
-                <form id="loginForm">
-                    <div class="mb-3">
-                        <input type="email" id="email" placeholder="Email (gmail.com)" class="form-control form-control-lg"
-                               pattern="^[a-zA-Z0-9._%+-]+@gmail\.com$" required>
-                    </div>
-                    <div class="mb-3">
-                        <input type="password" id="password" placeholder="Password" class="form-control form-control-lg" required>
-                    </div>
-                    <button type="submit" class="btn btn-warning btn-lg w-100 fw-bold">LOGIN</button>
-                </form>
+<div id="loginPage">
+    <div class="login-box">
+        <img src="euroleague.png" class="img-fluid mb-4" style="max-height: 100px;">
+        <form id="loginForm">
+            <div class="text-start small fw-bold mb-1">EMAIL:</div>
+            <input type="email" id="email" class="form-control custom-input" required>
+            <div class="text-start small fw-bold mb-1">PASSWORD:</div>
+            <input type="password" id="password" class="form-control custom-input" required>
+            <button type="submit" class="submit-btn mt-3">SUBMIT</button>
+        </form>
+    </div>
+</div>
+
+<div id="menuPage" class="page">
+    <div class="nav-header">
+        <span>☰</span>
+        <span class="fw-bold">🏠 HOME</span>
+        <span>⚙️</span>
+    </div>
+    <div class="container text-center py-5">
+        <h4 class="mb-5">Dobro došli u 6.75 range, ovde se bavimo detaljnom analizom košarkaških utakmica.</h4>
+        <div class="row g-4 justify-content-center">
+            <div class="col-4 col-md-2"><img src="euroleague.png" class="team-icon nav-btn" data-target="videoPage"></div>
+            <div class="col-4 col-md-2"><img src="euroleague.png" class="team-icon nav-btn" data-target="statsPage"></div>
+            <div class="col-4 col-md-2"><img src="euroleague.png" class="team-icon nav-btn" data-target="keyPage"></div>
+        </div>
+    </div>
+</div>
+
+<div id="videoPage" class="page">
+    <div class="nav-header">
+        <span>☰</span>
+        <span class="fw-bold">🏠 <span class="live-dot"></span>Video analiza utakmice</span>
+        <span>⚙️</span>
+    </div>
+    <div class="container mt-4 text-center">
+        <div class="glass-card">
+            <div class="row align-items-center">
+                <div class="col-md-10">
+                    <img src="brown.png" class="img-fluid rounded w-100" alt="Analysis">
+                </div>
+                <div class="col-md-2 d-flex flex-column p-3">
+                    <button class="btn-next">next</button>
+                    <button class="btn-next">next</button>
+                </div>
+            </div>
+            <p class="mt-3 small text-start text-secondary">*tačkice predstavljaju ključne momente</p>
+        </div>
+        <a href="#" class="back-btn" onclick="showPage('menuPage')">Nazad na meni</a>
+    </div>
+</div>
+
+<div id="statsPage" class="page">
+    <div class="nav-header"><span>☰</span><span class="fw-bold">🏠 Statistics</span><span>⚙️</span></div>
+    <div class="container mt-4 text-center">
+        <div class="glass-card bg-white text-dark">
+            <h5 class="text-start fw-bold mb-3">Player stats:</h5>
+            <img src="sigmascreenshot.png" class="img-fluid w-100" alt="Stats Table">
+        </div>
+        <a href="#" class="back-btn" onclick="showPage('menuPage')">Nazad na meni</a>
+    </div>
+</div>
+
+<div id="keyPage" class="page">
+    <div class="nav-header"><span>☰</span><span class="fw-bold">🏠 Key Moments</span><span>⚙️</span></div>
+    <div class="container mt-4 text-center">
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="glass-card">
+                    <p class="small text-start fw-bold">Moment 1 Analysis</p>
+                    <img src="kevinpunter.png" class="img-fluid rounded" alt="KP">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="glass-card">
+                    <p class="small text-start fw-bold">Moment 2 Analysis</p>
+                    <img src="kevinpunter7.png" class="img-fluid rounded" alt="KP7">
+                </div>
             </div>
         </div>
-    </div>
-</div>
-
-<div id="menuPage" class="container page">
-    <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6 text-center custom-card">
-            <h2 class="mb-4">Main Menu</h2>
-            <div class="d-grid gap-3">
-                <button class="btn btn-outline-primary btn-lg nav-btn" data-target="videoPage">Video Analysis</button>
-                <button class="btn btn-outline-primary btn-lg nav-btn" data-target="keyPage">Key Moments</button>
-                <button class="btn btn-outline-primary btn-lg nav-btn" data-target="statsPage">Player vs Team</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div id="videoPage" class="container page">
-    <div class="row">
-        <div class="col-12 mb-3">
-            <button class="btn btn-sm btn-light" onclick="showPage('menuPage')">← Back to Menu</button>
-        </div>
-        <div class="col-12 text-center">
-            <h3 class="mb-4">Video Analysis</h3>
-            <img src="brown.png" class="img-fluid img-fluid-custom" alt="Analysis">
-        </div>
-    </div>
-</div>
-
-<div id="keyPage" class="container page">
-    <div class="row">
-        <div class="col-12 mb-3">
-            <button class="btn btn-sm btn-light" onclick="showPage('menuPage')">← Back to Menu</button>
-        </div>
-        <div class="col-12 text-center">
-            <h3 class="mb-4">Key Moments</h3>
-        </div>
-        <div class="col-md-6">
-            <img src="kevinpunter.png" class="img-fluid img-fluid-custom" alt="Moment 1">
-        </div>
-        <div class="col-md-6">
-            <img src="kevinpunter7.png" class="img-fluid img-fluid-custom" alt="Moment 2">
-        </div>
-    </div>
-</div>
-
-<div id="statsPage" class="container page">
-    <div class="row justify-content-center">
-        <div class="col-12 mb-3">
-            <button class="btn btn-sm btn-light" onclick="showPage('menuPage')">← Back to Menu</button>
-        </div>
-        <div class="col-lg-10 text-center">
-            <h3 class="mb-4">Player vs Team Performance</h3>
-            <div class="table-responsive"> <img src="sigmascreenshot.png" class="img-fluid img-fluid-custom" alt="Stats">
-            </div>
-        </div>
+        <a href="#" class="back-btn" onclick="showPage('menuPage')">Nazad na meni</a>
     </div>
 </div>
 
 <script>
     function showPage(pageId){
-        
         document.getElementById('loginPage').style.display = 'none';
         document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
         
         const target = document.getElementById(pageId);
-        if(target.classList.contains('page')) {
-            target.style.display = 'block';
-        } else {
-            target.style.display = 'flex'; // Za login koji koristi flex
-        }
+        if(pageId === 'loginPage') target.style.display = 'flex';
+        else target.style.display = 'block';
+        window.scrollTo(0,0);
     }
 
     document.getElementById('loginForm').addEventListener('submit', function(e){
         e.preventDefault();
-        const email = document.getElementById('email');
-        if(email.checkValidity()){
-            showPage('menuPage');
-        } else {
-            email.reportValidity();
-        }
+        showPage('menuPage');
     });
 
-    document.querySelectorAll('.nav-btn').forEach(btn=>{
-        btn.addEventListener('click', ()=>{
-            const target = btn.getAttribute('data-target');
-            showPage(target);
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            showPage(btn.getAttribute('data-target'));
         });
     });
 </script>
